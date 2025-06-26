@@ -1,0 +1,7 @@
+fast-align-audio
+maturin>=1,<2
+numpy>=1.22,<3
+numpy-minmax
+pytest>7,<8
+scipy>=1.7,<2
+soundfile

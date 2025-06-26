@@ -1,0 +1,22 @@
+[package]
+name         = "mp3augment"
+version      = "0.1.0"
+edition      = "2021"
+publish      = false
+license      = "LGPL-2.1-or-later"
+
+[lib]
+name         = "mp3augment"
+crate-type   = ["cdylib"]
+
+[dependencies]
+pyo3      = { version = "0.21", features = ["extension-module", "abi3-py39"] }
+numpy     = "0.21"
+minimp3   = "0.5.1"
+thiserror = "1.0"
+rayon     = "1.8"
+lame-sys = { package = "mp3lame-sys", version = "0.1.9", default-features = false }
+
+[build-dependencies]
+cc        = "1.0"
+pkg-config = "0.3"

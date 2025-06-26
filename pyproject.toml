@@ -1,0 +1,27 @@
+[build-system]
+requires = ["maturin>=1.4", "numpy>=1.26"]
+build-backend = "maturin"
+
+[project]
+name        = "fast_mp3_augment"
+version     = "0.1.0"
+description = "Fast in‑memory MP3 encode‑decode augmentation for audiomentations"
+authors     = [{ name = "Iver Jordal", email = "iver56@hotmail.com" }]
+readme      = "README.md"
+requires-python = ">=3.9"
+license     = { text = "LGPL-2.1-or-later" }
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+]
+dependencies = [
+    "numpy>=1.22,<3",
+    "numpy-minmax"
+]
+
+[tool.maturin]
+module-name   = "fast_mp3_augment._mp3augment"
+features = ["pyo3/extension-module"]
+strip    = true
+include = ["LICENSE", "COPYING.LAME", "fast_mp3_augment/**/*"]
