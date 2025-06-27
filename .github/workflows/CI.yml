@@ -136,3 +136,29 @@ jobs:
         with:
           name: wheels-sdist
           path: dist
+
+  bundle:
+    needs:
+      - linux
+      - musllinux
+      - windows
+      - macos
+      - sdist
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download wheel archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: artifacts
+
+      - name: Gather all wheels
+        run: |
+          mkdir -p all_wheels
+          find artifacts -type f -name '*.whl' -exec cp {} all_wheels/ \;
+
+      - name: Upload combined wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-all
+          path: all_wheels
