@@ -151,14 +151,35 @@ jobs:
         with:
           pattern: wheels-*
           path: artifacts
-
       - name: Gather all wheels
         run: |
           mkdir -p all_wheels
           find artifacts -type f -name '*.whl' -exec cp {} all_wheels/ \;
-
       - name: Upload combined wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-all
           path: all_wheels
+
+  test:
+    needs: linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Download built wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-linux-x86_64
+          path: dist
+      - name: Install test dependencies
+        run: pip install -r dev_requirements.txt
+      - name: Install wheel
+        run: pip install dist/*.whl
+      - name: Run test suite
+        run: pytest
