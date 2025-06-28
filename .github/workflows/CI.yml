@@ -154,7 +154,7 @@ jobs:
       - name: Gather all wheels
         run: |
           mkdir -p all_wheels
-          find artifacts -type f -name '*.whl' -exec cp {} all_wheels/ \;
+          find artifacts -type f \( -name '*.whl' -o -name '*.tar.gz' \) -exec cp {} all_wheels/ \;
       - name: Upload combined wheels
         uses: actions/upload-artifact@v4
         with:

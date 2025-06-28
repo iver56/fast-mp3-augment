@@ -1,6 +1,16 @@
 # fast-mp3-augment
 
-A fast Python library for MP3 encoder + decoder data augmentation. Made for integration with [audiomentations](https://github.com/iver56/audiomentations/). Intentionally applying audio degradation by lossy compression help machine learning models learn to deal with compressed, low-quality audio found in the real world.
+A fast Python library for MP3 encoder + decoder data augmentation. Made for integration with [audiomentations](https://github.com/iver56/audiomentations/). Intentionally applying audio degradation by lossy compression help machine learning models learn to deal with audio that gets streamed from various internet services, which is commonly lossy/compressed.
+
+# Installation
+
+[![PyPI version](https://img.shields.io/pypi/v/fast-mp3-augment.svg?style=flat)](https://pypi.org/project/fast-mp3-augment/)
+![python 3.9, 3.10, 3.11, 3.12, 3.13](https://img.shields.io/badge/Python-3.9%20|%203.10%20|%203.11%20|%203.12%20|%203.13-blue)
+![os: Linux, macOS, Windows](https://img.shields.io/badge/OS-Linux%20%28arm%20%26%20x86--64%29%20|%20macOS%20%28arm%29%20|%20Windows%20%28x86--64%29-blue)
+
+```
+$ pip install fast-mp3-augment
+```
 
 ## Code example
 
@@ -36,6 +46,14 @@ This library is largely developed with Rust under the hood (via pyo3 & maturin),
 A quick performance benchmark (based on demo.py in audiomentations), which augmented 3 short (~7-9 sec) audio snippets (2 mono, 1 stereo) on a laptop with i7-13700HX and a 2 TB Samsung PM9A1 NVMe shows that fast-mp3-augment is superior when it comes to speed:
 
 ![images/perf_benchmark_results.png](images/perf_benchmark_results.png)
+
+## Changelog
+
+## [0.1.0] - 2025-06-28
+
+Initial release
+
+For the complete changelog, go to [CHANGELOG.md](CHANGELOG.md)
 
 ## Development setup
 
