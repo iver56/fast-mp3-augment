@@ -72,11 +72,12 @@ def compress_roundtrip(
     :param samples: 1D or 2D samples with shape (channels, samples)
     :param sample_rate: Sample rate of the audio in Hertz
     :param bitrate_kbps: Constant bitrate (in kbps) to use when encoding the audio
-    :param preserve_delay: If preserve_delay is set to False (default), the sync and the length of the output matches the input.
-        If set to True, include encoder delay, filter delay (a few tens of milliseconds) and padding in the output.
+    :param preserve_delay:
+        If False (default), the output length and timing will match the input.
+        If True, include LAME encoder delay + filter delay (a few tens of milliseconds) and padding in the output.
         This makes the output
         1) longer than the input
-        2) delayed (out of sync) compared to the input
+        2) delayed (out of sync) relative to the input
         Normally, it makes sense to set preserve_delay to False, but if you want outputs that include the
         short, almost silent part in the beginning, you here have the option to get that.
     :param quality: An int in range [0, 9].
