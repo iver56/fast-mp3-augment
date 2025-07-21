@@ -10,7 +10,6 @@ authors     = [{ name = "Iver Jordal", email = "iver56@hotmail.com" }]
 readme      = "README.md"
 requires-python = ">=3.9"
 license     = { text = "LGPL-2.1-or-later" }
-homepage = "https://github.com/iver56/fast-mp3-augment"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: 3 :: Only",
@@ -20,6 +19,9 @@ dependencies = [
     "numpy>=1.22,<3",
     "numpy-minmax"
 ]
+
+[project.urls]
+Homepage = "https://github.com/iver56/fast-mp3-augment"
 
 [tool.maturin]
 module-name   = "fast_mp3_augment._mp3augment"
