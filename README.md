@@ -45,7 +45,7 @@ This library is largely developed with Rust under the hood (via pyo3 & maturin),
 
 A quick performance benchmark (based on demo.py in audiomentations), which augmented 3 short (~7-9 sec) audio snippets (2 mono, 1 stereo) on a laptop with i7-13700HX and a 2 TB Samsung PM9A1 NVMe shows that fast-mp3-augment is superior when it comes to speed:
 
-![images/perf_benchmark_results.png](images/perf_benchmark_results.png)
+![perf_benchmark_results.png](https://raw.githubusercontent.com/iver56/fast-mp3-augment/master/images/perf_benchmark_results.png)
 
 ## Changelog
 
