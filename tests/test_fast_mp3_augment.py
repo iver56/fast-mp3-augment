@@ -1,11 +1,13 @@
+import fast_align_audio
 import time
 from pathlib import Path
 
-import fast_align_audio
 import numpy as np
 import pytest
-import soundfile
 import scipy.signal
+import soundfile
+from utils import fast_autocorr, find_best_alignment_offset_with_corr_coef
+
 import fast_mp3_augment
 
 TEST_FIXTURES_PATH = Path(__file__).resolve().parent.parent / "test_fixtures"
@@ -29,12 +31,13 @@ def test_mono_1d():
     assert augmented_audio.shape == audio.shape
     assert augmented_audio.dtype == augmented_audio.dtype
 
-    offset, mse = fast_align_audio.find_best_alignment_offset(
+    offset, corr = find_best_alignment_offset_with_corr_coef(
         reference_signal=audio,
         delayed_signal=augmented_audio,
+        min_offset_samples=0,
         max_offset_samples=3000,
     )
-    assert mse <= 5e-5
+    assert corr > 0.99
     assert offset == 0
 
 
@@ -53,9 +56,10 @@ def test_mono_1d_preserve_delay():
     assert augmented_audio.shape[-1] > audio.shape[-1]
     assert augmented_audio.dtype == augmented_audio.dtype
 
-    offset, mse = fast_align_audio.find_best_alignment_offset(
-        reference_signal=audio,
-        delayed_signal=augmented_audio,
+    offset, _ = find_best_alignment_offset_with_corr_coef(
+        reference_signal=audio[0:10000],
+        delayed_signal=augmented_audio[0:10000],
+        min_offset_samples=0,
         max_offset_samples=3000,
     )
     assert offset > 0
@@ -89,12 +93,13 @@ def test_stereo():
     assert augmented_audio.shape == audio.shape
     assert augmented_audio.dtype == augmented_audio.dtype
 
-    offset, mse = fast_align_audio.find_best_alignment_offset(
+    offset, corr = find_best_alignment_offset_with_corr_coef(
         reference_signal=audio[0],
         delayed_signal=augmented_audio[0],
+        min_offset_samples=0,
         max_offset_samples=3000,
     )
-    assert mse <= 5e-5
+    assert corr > 0.99
     assert offset == 0
 
 
@@ -111,9 +116,10 @@ def test_stereo_preserve_delay():
     assert augmented_audio.shape[1] > audio.shape[1]
     assert augmented_audio.dtype == augmented_audio.dtype
 
-    offset, mse = fast_align_audio.find_best_alignment_offset(
-        reference_signal=audio[0],
-        delayed_signal=augmented_audio[0],
+    offset, _ = find_best_alignment_offset_with_corr_coef(
+        reference_signal=audio[0, :10000],
+        delayed_signal=augmented_audio[0, :10000],
+        min_offset_samples=0,
         max_offset_samples=3000,
     )
     assert offset > 0
@@ -195,7 +201,7 @@ def test_supported_sample_rates():
                 )
                 assert offset == 0
 
-                corr = fast_align_audio.alignment.fast_autocorr(
+                corr = fast_autocorr(
                     sig.flatten(), augmented_sig.flatten(), t=0
                 )
                 assert not np.any(np.isnan(augmented_sig))
