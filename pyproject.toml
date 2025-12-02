@@ -8,7 +8,7 @@ version     = "0.1.0"
 description = "Fast in‑memory MP3 encode‑decode augmentation for audiomentations"
 authors     = [{ name = "Iver Jordal", email = "iver56@hotmail.com" }]
 readme      = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license     = { text = "LGPL-2.1-or-later" }
 classifiers = [
     "Programming Language :: Rust",
