@@ -10,7 +10,7 @@ name = "mp3augment"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.21", features = ["extension-module", "abi3-py39"] }
-numpy = "0.21"
+pyo3 = { version = "0.27.2", features = ["extension-module", "abi3-py39"] }
+numpy = "0.27.1"
 minimp3 = "0.5.1"
 lame-sys = { package = "mp3lame-sys", version = "0.1.9", default-features = false }

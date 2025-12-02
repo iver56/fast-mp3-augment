@@ -139,11 +139,11 @@ fn compress_roundtrip<'py>(
     // Create NumPy view
     let arr = if in_ch == 1 {
         // Mono/1D
-        out_planar.into_pyarray_bound(py).to_dyn().clone()
+        out_planar.into_pyarray(py).to_dyn().clone()
     } else {
         // Stereo/2D
         out_planar
-            .into_pyarray_bound(py)
+            .into_pyarray(py)
             .reshape([in_ch, frames_out])?
             .to_dyn()
             .clone()
