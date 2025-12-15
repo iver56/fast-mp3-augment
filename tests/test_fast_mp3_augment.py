@@ -1,23 +1,14 @@
-import fast_align_audio
 import time
 from pathlib import Path
 
 import numpy as np
 import pytest
-import scipy.signal
 import soundfile
-from utils import fast_autocorr, find_best_alignment_offset_with_corr_coef
+from utils import find_best_alignment_offset_with_corr_coef
 
 import fast_mp3_augment
 
 TEST_FIXTURES_PATH = Path(__file__).resolve().parent.parent / "test_fixtures"
-
-
-def get_chirp_test(sample_rate, duration):
-    """Create a `duration` seconds chirp from 0 Hz to Nyquist frequency"""
-    n = np.arange(0, duration, 1 / sample_rate)
-    samples = scipy.signal.chirp(n, 0, duration, sample_rate // 2, method="linear")
-    return samples.astype(np.float32)
 
 
 def test_mono_1d():
@@ -162,51 +153,68 @@ def test_transposed_but_not_contiguous_audio():
         )
 
 
-def test_supported_sample_rates():
-    sample_rates = (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000)
-    duration_s = 2
+@pytest.mark.parametrize(
+    "sample_rate",
+    (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000),
+)
+@pytest.mark.parametrize(
+    "bitrate_kbps",
+    (
+        8,
+        16,
+        24,
+        32,
+        40,
+        48,
+        56,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        192,
+        224,
+        256,
+        320,
+    ),
+)
+@pytest.mark.parametrize("num_channels", (1, 2))
+def test_supported_sample_rates(sample_rate, bitrate_kbps, num_channels):
+    audio, _ = soundfile.read(
+        TEST_FIXTURES_PATH / "p286_011.wav",
+        dtype=np.float32,
+        start=48000,
+        stop=48000 + sample_rate * 2,
+    )
+    audio = np.expand_dims(audio, axis=0)
+    if num_channels == 2:
+        placeholder = np.empty(shape=(2, audio.shape[-1]), dtype=np.float32)
+        placeholder[0] = audio[0]
+        placeholder[1] = audio[0]
+        audio = placeholder
 
-    for sample_rate in sample_rates:
-        for bitrate_kbps in [
-            8,
-            16,
-            24,
-            32,
-            40,
-            48,
-            56,
-            64,
-            80,
-            96,
-            112,
-            128,
-            144,
-            160,
-            192,
-            224,
-            256,
-            320,
-        ]:
-            for num_channels in (1, 2):
-                sig = get_chirp_test(sample_rate, duration_s)
-                sig = np.ascontiguousarray(sig.reshape((num_channels, -1)))
-                augmented_sig = fast_mp3_augment.compress_roundtrip(
-                    sig, sample_rate, bitrate_kbps=bitrate_kbps
-                )
-                assert augmented_sig.shape == sig.shape
-                offset, mse = fast_align_audio.find_best_alignment_offset(
-                    reference_signal=sig[0],
-                    delayed_signal=augmented_sig[0],
-                    max_offset_samples=3000,
-                )
-                assert offset == 0
+    sig = np.ascontiguousarray(audio)
 
-                corr = fast_autocorr(
-                    sig.flatten(), augmented_sig.flatten(), t=0
-                )
-                assert not np.any(np.isnan(augmented_sig))
-                if bitrate_kbps == 96:
-                    assert corr > 0.75
+    augmented_sig = fast_mp3_augment.compress_roundtrip(
+        sig, sample_rate, bitrate_kbps=bitrate_kbps
+    )
+
+    assert augmented_sig.shape == sig.shape
+
+    offset, corr = find_best_alignment_offset_with_corr_coef(
+        reference_signal=sig[0],
+        delayed_signal=augmented_sig[0],
+        min_offset_samples=0,
+        max_offset_samples=3000,
+    )
+    assert offset == 0
+
+    assert not np.any(np.isnan(augmented_sig))
+
+    if bitrate_kbps == 96:
+        assert corr > 0.75
 
 
 def test_unsupported_sample_rate():

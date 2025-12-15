@@ -19,6 +19,7 @@ def find_best_alignment_offset_with_corr_coef(
     max_offset_samples: int,
     lookahead_samples: int | None = None,
     consider_both_polarities: bool = True,
+    plot: bool = False,
 ):
     """
     Returns the estimated delay (in samples) between the original and delayed signal,
@@ -35,9 +36,8 @@ def find_best_alignment_offset_with_corr_coef(
                                            while estimating the delay. If None, the
                                            whole delayed signal is considered.
         consider_both_polarities (bool): If True, the function will consider both positive
-                                         and negative correlations, which corresponds to
-                                         the same or opposite polarities in signals,
-                                         respectively. Defaults to True.
+                                         and negative correlations.
+        plot (bool): If True, plots correlation coefficient vs. lag.
 
     Returns:
         tuple: Estimated delay (int) and correlation coefficient (float).
@@ -54,12 +54,16 @@ def find_best_alignment_offset_with_corr_coef(
         original_signal_slice = reference_signal
         delayed_signal_slice = delayed_signal
 
+    lags = np.arange(min_offset_samples, max_offset_samples)
     coefs = []
-    for lag in range(min_offset_samples, max_offset_samples):
+
+    for lag in lags:
         correlation_coef = fast_autocorr(
             original_signal_slice, delayed_signal_slice, t=lag
         )
         coefs.append(correlation_coef)
+
+    coefs = np.asarray(coefs)
 
     if consider_both_polarities:
         # In this mode we aim to find the correlation coefficient of highest magnitude.
@@ -69,6 +73,19 @@ def find_best_alignment_offset_with_corr_coef(
         most_extreme_coef_index = int(np.argmax(np.abs(coefs)))
     else:
         most_extreme_coef_index = int(np.argmax(coefs))
+
     most_extreme_coef = coefs[most_extreme_coef_index]
-    offset = most_extreme_coef_index + min_offset_samples
+    offset = lags[most_extreme_coef_index]
+
+    if plot:
+        import matplotlib.pyplot as plt
+
+        plt.figure()
+        plt.plot(lags, coefs)
+        plt.axvline(offset)
+        plt.xlabel("Lag (samples)")
+        plt.ylabel("Correlation coefficient")
+        plt.title("Correlation vs. Lag")
+        plt.show()
+
     return offset, most_extreme_coef
