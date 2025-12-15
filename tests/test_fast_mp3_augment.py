@@ -162,51 +162,60 @@ def test_transposed_but_not_contiguous_audio():
         )
 
 
-def test_supported_sample_rates():
-    sample_rates = (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000)
+@pytest.mark.parametrize(
+    "sample_rate",
+    (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000),
+)
+@pytest.mark.parametrize(
+    "bitrate_kbps",
+    (
+        8,
+        16,
+        24,
+        32,
+        40,
+        48,
+        56,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        192,
+        224,
+        256,
+        320,
+    ),
+)
+@pytest.mark.parametrize("num_channels", (1, 2))
+def test_supported_sample_rates(sample_rate, bitrate_kbps, num_channels):
     duration_s = 2
 
-    for sample_rate in sample_rates:
-        for bitrate_kbps in [
-            8,
-            16,
-            24,
-            32,
-            40,
-            48,
-            56,
-            64,
-            80,
-            96,
-            112,
-            128,
-            144,
-            160,
-            192,
-            224,
-            256,
-            320,
-        ]:
-            for num_channels in (1, 2):
-                sig = get_chirp_test(sample_rate, duration_s)
-                sig = np.ascontiguousarray(sig.reshape((num_channels, -1)))
-                augmented_sig = fast_mp3_augment.compress_roundtrip(
-                    sig, sample_rate, bitrate_kbps=bitrate_kbps
-                )
-                assert augmented_sig.shape == sig.shape
-                offset, mse = fast_align_audio.find_best_alignment_offset(
-                    reference_signal=sig[0],
-                    delayed_signal=augmented_sig[0],
-                    max_offset_samples=3000,
-                )
-                assert offset == 0
+    sig = get_chirp_test(sample_rate, duration_s)
+    sig = np.ascontiguousarray(sig.reshape((num_channels, -1)))
 
-                corr = fast_autocorr(
-                    sig.flatten(), augmented_sig.flatten(), t=0
-                )
-                assert not np.any(np.isnan(augmented_sig))
-                if bitrate_kbps == 96:
-                    assert corr > 0.75
+    augmented_sig = fast_mp3_augment.compress_roundtrip(
+        sig, sample_rate, bitrate_kbps=bitrate_kbps
+    )
+
+    assert augmented_sig.shape == sig.shape
+
+    offset, mse = fast_align_audio.find_best_alignment_offset(
+        reference_signal=sig[0],
+        delayed_signal=augmented_sig[0],
+        max_offset_samples=3000,
+        method="mse",
+    )
+    assert offset == 0
+
+    corr = fast_autocorr(sig.flatten(), augmented_sig.flatten(), t=0)
+
+    assert not np.any(np.isnan(augmented_sig))
+
+    if bitrate_kbps == 96:
+        assert corr > 0.75
 
 
 def test_unsupported_sample_rate():
