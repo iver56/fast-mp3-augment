@@ -1,12 +1,10 @@
-import fast_align_audio
 import time
 from pathlib import Path
 
 import numpy as np
 import pytest
-import scipy.signal
 import soundfile
-from utils import fast_autocorr, find_best_alignment_offset_with_corr_coef
+from utils import find_best_alignment_offset_with_corr_coef
 
 import fast_mp3_augment
 
