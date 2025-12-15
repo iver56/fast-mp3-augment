@@ -49,9 +49,11 @@ A quick performance benchmark (based on demo.py in audiomentations), which augme
 
 ## Changelog
 
-## [0.1.0] - 2025-06-28
+## [0.2.0] - 2025-12-15
 
-Initial release
+* Bump min Python version to 3.10
+* Officially add support for Python 3.14
+* Make builds slightly slimmer
 
 For the complete changelog, go to [CHANGELOG.md](CHANGELOG.md)
 

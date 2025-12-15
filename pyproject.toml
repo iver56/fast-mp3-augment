@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name        = "fast_mp3_augment"
-version     = "0.1.0"
+version     = "0.2.0"
 description = "Fast in‑memory MP3 encode‑decode augmentation for audiomentations"
 authors     = [{ name = "Iver Jordal", email = "iver56@hotmail.com" }]
 readme      = "README.md"
