@@ -13,13 +13,6 @@ import fast_mp3_augment
 TEST_FIXTURES_PATH = Path(__file__).resolve().parent.parent / "test_fixtures"
 
 
-def get_chirp_test(sample_rate, duration):
-    """Create a `duration` seconds chirp from 0 Hz to Nyquist frequency"""
-    n = np.arange(0, duration, 1 / sample_rate)
-    samples = scipy.signal.chirp(n, 0, duration, sample_rate // 2, method="linear")
-    return samples.astype(np.float32)
-
-
 def test_mono_1d():
     audio, sample_rate = soundfile.read(
         TEST_FIXTURES_PATH / "p286_011.wav", dtype=np.float32
@@ -191,10 +184,20 @@ def test_transposed_but_not_contiguous_audio():
 )
 @pytest.mark.parametrize("num_channels", (1, 2))
 def test_supported_sample_rates(sample_rate, bitrate_kbps, num_channels):
-    duration_s = 2
+    audio, _ = soundfile.read(
+        TEST_FIXTURES_PATH / "p286_011.wav",
+        dtype=np.float32,
+        start=48000,
+        stop=48000 + sample_rate * 2,
+    )
+    audio = np.expand_dims(audio, axis=0)
+    if num_channels == 2:
+        placeholder = np.empty(shape=(2, audio.shape[-1]), dtype=np.float32)
+        placeholder[0] = audio[0]
+        placeholder[1] = audio[0]
+        audio = placeholder
 
-    sig = get_chirp_test(sample_rate, duration_s)
-    sig = np.ascontiguousarray(sig.reshape((num_channels, -1)))
+    sig = np.ascontiguousarray(audio)
 
     augmented_sig = fast_mp3_augment.compress_roundtrip(
         sig, sample_rate, bitrate_kbps=bitrate_kbps
@@ -202,15 +205,13 @@ def test_supported_sample_rates(sample_rate, bitrate_kbps, num_channels):
 
     assert augmented_sig.shape == sig.shape
 
-    offset, mse = fast_align_audio.find_best_alignment_offset(
+    offset, corr = find_best_alignment_offset_with_corr_coef(
         reference_signal=sig[0],
         delayed_signal=augmented_sig[0],
+        min_offset_samples=0,
         max_offset_samples=3000,
-        method="mse",
     )
     assert offset == 0
-
-    corr = fast_autocorr(sig.flatten(), augmented_sig.flatten(), t=0)
 
     assert not np.any(np.isnan(augmented_sig))
 
